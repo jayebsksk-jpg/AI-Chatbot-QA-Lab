@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palette - Contrast Safe Theme Generator</title>
+  <style>
+    :root { --p: #1e3a8a; --bg: #fafafa; --fg: #1f2937; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); display: grid; place-items: center; min-height: 100vh; margin: 0; }
+    main { text-align: center; padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px #00000010; max-width: 400px; width: 90%; }
+    button { background: var(--p); color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    button:hover { filter: brightness(0.9); }
+    button:focus-visible { outline: 3px solid #312e81; outline-offset: 2px; }
+    .toast { margin-top: 1rem; font-size: 0.875rem; color: #15803d; min-height: 1.25rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Palette Generator</h1>
+    <p>Generate contrast-accessible color palettes with a single click.</p>
+    <button id="gen" aria-label="Generate new color palette">Generate Palette</button>
+    <div id="toast" role="status" aria-live="polite" class="toast"></div>
+  </main>
+  <script>
+    const colors = ['#312e81', '#1e3a8a', '#064e3b', '#7f1d1d', '#701a75', '#78350f'];
+    const gen = document.getElementById('gen'), toast = document.getElementById('toast');
+    let timeout;
+    gen.addEventListener('click', () => {
+      clearTimeout(timeout);
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      document.documentElement.style.setProperty('--p', c);
+      toast.textContent = "New accessible color palette generated!";
+      timeout = setTimeout(() => { toast.textContent = ""; }, 3000);
+    });
+  </script>
+</body>
+</html>
