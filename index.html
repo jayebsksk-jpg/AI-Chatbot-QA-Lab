@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palette - Contrast Safe Theme Generator</title>
+  <style>
+    :root { --p: #1e3a8a; --bg: #fafafa; --fg: #1f2937; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); display: grid; place-items: center; min-height: 100vh; margin: 0; }
+    main { text-align: center; padding: 2.5rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px #00000010; max-width: 400px; width: 90%; }
+    h1 { margin-top: 0; font-size: 1.75rem; }
+    p { color: #4b5563; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+    .hex-box { font-family: monospace; font-size: 1.25rem; font-weight: bold; color: var(--p); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: color 0.2s; }
+    .swatch { width: 1.25rem; height: 1.25rem; border-radius: 4px; background: var(--p); display: inline-block; box-shadow: 0 1px 3px #00000020; transition: background 0.2s; flex-shrink: 0; }
+    .btn-container { display: flex; gap: 0.75rem; justify-content: center; }
+    button { background: var(--p); color: #fff; border: none; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+    button:hover { filter: brightness(0.9); }
+    button:focus-visible { outline: 3px solid var(--p); outline-offset: 2px; }
+    .btn-sec { background: transparent; color: var(--fg); border: 2px solid var(--p); padding: 0.625rem 1.125rem; }
+    .btn-sec:hover { background: rgba(0, 0, 0, 0.03); }
+    kbd { font-family: system-ui, sans-serif; background: #f3f4f6; border: 1px solid #d1d5db; border-bottom: 2px solid #9ca3af; border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.7rem; color: #374151; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; pointer-events: none; }
+    .toast { margin-top: 1.5rem; font-size: 0.875rem; color: #15803d; min-height: 1.25rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Palette Generator</h1>
+    <p>Generate contrast-accessible color palettes with a single click.</p>
+    <div class="hex-box">
+      <span style="font-weight: 500; font-family: system-ui; font-size: 0.95rem; color: #4b5563;">Active Color:</span>
+      <span class="swatch" aria-hidden="true"></span>
+      <span id="hex-val">#1e3a8a</span>
+    </div>
+    <div class="btn-container">
+      <button id="gen" aria-label="Generate new color palette" aria-keyshortcuts="g">Generate <kbd>G</kbd></button>
+      <button id="copy" class="btn-sec" aria-label="Copy active hex color to clipboard" aria-keyshortcuts="c">Copy <kbd>C</kbd></button>
+    </div>
+    <div id="toast" role="status" aria-live="polite" class="toast"></div>
+  </main>
+  <script>
+    const colors = ['#312e81', '#1e3a8a', '#064e3b', '#7f1d1d', '#701a75', '#78350f'];
+    const gen = document.getElementById('gen'), copy = document.getElementById('copy'), toast = document.getElementById('toast'), hexVal = document.getElementById('hex-val');
+    let timeout;
+    let activeColor = '#1e3a8a';
+
+    function showToast(msg) {
+      clearTimeout(timeout);
+      toast.textContent = "";
+      // RequestAnimationFrame trick to force the DOM/screen-reader update
+      requestAnimationFrame(() => {
+        toast.textContent = msg;
+      });
+      timeout = setTimeout(() => { toast.textContent = ""; }, 3000);
+    }
+
+    function generatePalette() {
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      activeColor = c;
+      hexVal.textContent = c;
+      document.documentElement.style.setProperty('--p', c);
+      showToast(`New accessible color palette generated: ${c}!`);
+    }
+
+    async function copyToClipboard() {
+      try {
+        await navigator.clipboard.writeText(activeColor);
+        showToast(`Copied ${activeColor} to clipboard!`);
+      } catch (err) {
+        // Fallback approach if navigator.clipboard is unavailable
+        const el = document.createElement('textarea');
+        el.value = activeColor;
+        el.setAttribute('readonly', '');
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast(`Copied ${activeColor} to clipboard!`);
+      }
+    }
+
+    gen.addEventListener('click', generatePalette);
+    copy.addEventListener('click', copyToClipboard);
+
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.isContentEditable)) {
+        return;
+      }
+      const key = e.key.toLowerCase();
+      if (key === 'g') {
+        e.preventDefault();
+        generatePalette();
+      } else if (key === 'c') {
+        e.preventDefault();
+        copyToClipboard();
+      }
+    });
+  </script>
+</body>
+</html>
